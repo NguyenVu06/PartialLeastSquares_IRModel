@@ -19,11 +19,8 @@ from sklearn.model_selection import cross_val_predict, cross_val_score
 from sklearn.metrics import mean_squared_error, r2_score
 
 #%%
-col1, mid, col2 = st.beta_columns([10,1,20])
-with col1:
-    
-with col2:
-    st.title("Partial Least Squares Cis-DP Concentration Prediction by IR")
+
+st.title("Partial Least Squares Cis-DP Concentration Prediction by IR")
 ########## Generate the training model ##########
 
 st.write("Version 1.0")
