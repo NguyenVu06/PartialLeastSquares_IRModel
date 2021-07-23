@@ -29,7 +29,7 @@ st.subheader("Nguyen D. Vu  \n 23Jul2021")
 # read in data and wavelength info:
 # Read IN training Data and test data
 #data = pd.read_csv("corrected_spectra.csv", header=None)
-train_uploaded_csv = st.file_uploader("Upload The Training Spectra")
+train_uploaded_csv = st.file_uploader("Upload The Training Spectra (X)")
 if train_uploaded_csv is not None:
     data = pd.read_csv(train_uploaded_csv, header=None)
     wavelengths = (pd.read_csv("Wavenumber data.csv").columns).astype(float)
@@ -38,7 +38,7 @@ else:
     st.stop()
 
 #Get X matrix and y
-y_uploaded_csv = st.file_uploader("Upload The Expected Concentration")
+y_uploaded_csv = st.file_uploader("Upload The Expected Concentration (Y)")
 try:    
     y = pd.read_csv(y_uploaded_csv, header=None)[0].values
 except:
