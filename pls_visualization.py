@@ -24,7 +24,7 @@ st.title("Partial Least Squares Cis-DP Concentration Prediction by IR")
 ########## Generate the training model ##########
 
 st.write("Version 1.0")
-st.subheader("Nguyen D. Vu  \n 23Jul2021")
+st.subheader("Nguyen D. Vu ")
 
 # read in data and wavelength info:
 # Read IN training Data and test data
@@ -49,32 +49,33 @@ X = data.values
 
 
 st.subheader("Training Set Concentration Distribution (mg/mL)")
-conc_distr = sns.displot(y, bins=12, discrete=True)
+y_plot = pd.Series(y, name="mg/mL")
+conc_distr = sns.displot(y_plot, bins=12, discrete=True)
 st.pyplot(conc_distr)
 
 
 ########## PLOT WAVELENGTHS ##############
 st.subheader("Training Model Spectras")
 spectras = plt.figure(figsize=(14, 6.5))
-with plt.style.context('ggplot'):
+with plt.style.context('seaborn-notebook'):
     plt.plot(wavelengths, X.T)
     plt.xlabel("Wavelengths (nm)")
-    plt.ylabel("Absorbance")
+    plt.ylabel("Abs")
 
 st.write(spectras)
 
 # window length = 19
-win_len = st.sidebar.slider("Select window length for Savitzky-Golay normalization", 7, 25, step=2)
-poly_order = st.sidebar.slider("Select Polynomial fit for Savitzky-Golay normalization", 1, 5, step=1)
-deriv_ = st.sidebar.slider("Select derivative for Savitzky-Golay normalization", 0, 4, step=1)
+win_len = st.sidebar.slider("Select window length for Savitzky-Golay norm", 7, 25, step=2)
+poly_order = st.sidebar.slider("Select Polynomial fit for Savitzky-Golay norm", 1, 5, step=1)
+deriv_ = st.sidebar.slider("Select derivative for Savitzky-Golay norm", 0, 4, step=1)
 X2 = savgol_filter(X, win_len, polyorder=poly_order, deriv=deriv_)
 
 st.subheader("Savitzky-Golay Normalized Training Model Spectras")
 normalized_spectras = plt.figure(figsize=(14, 6.5))
-with plt.style.context('ggplot'):
+with plt.style.context('seaborn-notebook'):
     plt.plot(wavelengths, X2.T)
     plt.xlabel("Wavelengths (nm)")
-    plt.ylabel("D2 Absorbance")
+    plt.ylabel("Normalized Abs")
 
 st.write(normalized_spectras)
 
@@ -109,13 +110,13 @@ for n_comp in xticks:
 # Plot the mses
 def plot_metrics(vals, ylabel, objective):
     plot_out = plt.figure(figsize=(14, 6.5))
-    with plt.style.context('ggplot'):
-        plt.plot(xticks, np.array(vals), '-v', color='blue', mfc='blue')
+    with plt.style.context('fivethirtyeight'):
+        plt.plot(xticks, np.array(vals), '-v', color='green', mfc='green')
         if objective=='min':
             idx = np.argmin(vals)
         else:
             idx = np.argmax(vals)
-        plt.plot(xticks[idx], np.array(vals)[idx], 'P', ms=10, mfc='red')
+        plt.plot(xticks[idx], np.array(vals)[idx], '*', ms=20, mfc='red')
 
         plt.xlabel('Number of PLS components')
         plt.xticks = xticks
@@ -136,7 +137,7 @@ st.pyplot(r2_plot)
 
 
 st.subheader("Examine the 3 diagnostic plot above and enter the optimal number of components")
-opt_nComp = st.number_input("Optimal # of components =", min_value=1, max_value=29, step=1)
+opt_nComp = st.number_input("Optimal # of components =", min_value=1, max_value=17, step=1)
 
 y_cv, r2, mse, rpd = optimise_pls_cv(X2, y, opt_nComp)
 
@@ -144,11 +145,11 @@ st.write('R2 = %0.4f, MSE = %0.4f, RPD = %0.4f' %(r2, mse, rpd))
 
 #plot final model
 final_model = plt.figure(figsize=(6, 4))
-with plt.style.context('ggplot'):
-    plt.scatter(y, y_cv, color='red')
-    plt.plot(y, y, '-g', label='Expected regression line')
+with plt.style.context('seaborn'):
+    plt.scatter(y, y_cv, color='black', s=10)
+    plt.plot(y, y, color='red', label='Model')
     z = np.polyfit(y, y_cv, 1)
-    plt.plot(np.polyval(z, y), y, color='blue', label='Predicted regression line')
+    plt.plot(np.polyval(z, y), y, color='blue', label='Predicted')
     plt.xlabel('Actual')
     plt.ylabel('Predicted')
     plt.legend()
