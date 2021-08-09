@@ -82,6 +82,7 @@ st.write(normalized_spectras)
 cv_ = st.sidebar.slider(" K-Fold Validation, K = ", 3, 15, step=1)
 
 ########## Training Model Functions #####################
+
 def optimise_pls_cv(X, y, n_comp):
     # Define PLS object
     pls = PLSRegression(n_components=n_comp)
@@ -108,6 +109,7 @@ for n_comp in xticks:
     rpds.append(rpd)
 
 # Plot the mses
+@st.cache
 def plot_metrics(vals, ylabel, objective):
     plot_out = plt.figure(figsize=(14, 6.5))
     with plt.style.context('fivethirtyeight'):
