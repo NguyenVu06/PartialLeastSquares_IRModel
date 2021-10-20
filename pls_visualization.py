@@ -15,15 +15,19 @@ import pydeck as pdk
 from scipy.signal import savgol_filter
 
 from sklearn.cross_decomposition import PLSRegression
-from sklearn.model_selection import cross_val_predict, cross_val_score
+from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import mean_squared_error, r2_score
+
+import pickle #store trained model
+import base64 #define bit
+
 
 #%%
 
-st.title("Partial Least Squares Cis-DP Concentration Prediction by IR")
+st.title("Partial Least Squares Prediction by IR")
 ########## Generate the training model ##########
 
-st.write("Version 1.0")
+st.write("Version 2.0")
 st.subheader("Nguyen D. Vu ")
 
 # read in data and wavelength info:
@@ -32,11 +36,23 @@ st.subheader("Nguyen D. Vu ")
 train_uploaded_csv = st.file_uploader("Upload The Training Spectra (X)")
 if train_uploaded_csv is not None:
     data = pd.read_csv(train_uploaded_csv, header=None)
-    wavelengths = (pd.read_csv("Wavenumber data.csv").columns).astype(float)
+    # take out built in Wavenumber file
+    X = data.values
 else:
     st.exception(exception=NameError("Import The training set to initiate model"))
     st.stop()
-
+    
+# upload Wavenumber CSV file:
+wavelengths_csv = st.file_uploader("Upload wavelengths file here:")
+if wavelengths_csv is not None:
+    wavelengths = (pd.read_csv(wavelengths_csv).columns).astype(float)
+    if len(wavelengths)!=len(X.T):
+        st.exception(exception=NameError("The number of wavelengths have to match the X set"))
+        st.stop()
+else:
+    st.exception(exception=NameError("Import The Wavelength file to continue"))
+    st.stop()
+    
 #Get X matrix and y
 y_uploaded_csv = st.file_uploader("Upload The Expected Concentration (Y)")
 try:    
@@ -45,7 +61,6 @@ except:
     st.write("Import The training set to initiate model")
     st.stop()
 
-X = data.values
 
 
 st.subheader("Training Set Concentration Distribution (mg/mL)")
@@ -97,7 +112,7 @@ def optimise_pls_cv(X, y, n_comp):
     
     return (y_cv, r2, mse, rpd)
 
-# test with 30 components
+# test with up to 30 components
 r2s = []
 mses = []
 rpds = []
@@ -159,6 +174,43 @@ with plt.style.context('seaborn'):
 
 st.pyplot(final_model)
 
+#define function to download pickle model:
+def download_model(model):
+    output_model = pickle.dump(model)
+    b64 = base64.b64encode(output_model).decode()
+    href = f'<a href="data:file/output_model;base64,{b64}" download="myfile.pkl">Download Trained Model .pkl File</a>'
+    st.markdown(href, unsafe_allow_html=True)
+    
+#add button to export pickled trained Model
+if st.button("Export Trained Model"):
+
+    pls_model = PLSRegression(n_components=opt_nComp).fit(X2, y)
+    
+    download_model(pls_model)
+    st.write("Model Exported!")
+
+
+def download_link(object_to_download, download_filename, download_link_text):
+    """
+    Generates a link to download the given object_to_download.
+    - from Chad_Mitchell (streamlit)
+    object_to_download (str, pd.DataFrame):  The object to be downloaded.
+    download_filename (str): filename and extension of file. e.g. mydata.csv, some_txt_output.txt
+    download_link_text (str): Text to display for download link.
+
+    Examples:
+    download_link(YOUR_DF, 'YOUR_DF.csv', 'Click here to download data!')
+    download_link(YOUR_STRING, 'YOUR_STRING.txt', 'Click here to download your text!')
+
+    """
+    if isinstance(object_to_download,pd.DataFrame):
+        object_to_download = object_to_download.to_csv(index=False)
+
+    # some strings <-> bytes conversions necessary here
+    b64 = base64.b64encode(object_to_download.encode("UTF-8")).decode()#encode as csv
+
+    return f'<a href="data:file/txt;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
+
 ## Upload test file
 uploaded_csv = st.file_uploader("Upload your spectra for prediction")
 if uploaded_csv is not None:
@@ -180,7 +232,11 @@ if uploaded_csv is not None:
     st.altair_chart(y_pred_chart, use_container_width=True)
     st.write("Predicted Mean Concentration = {:.2f} mg/mL   \nStandard Deviation = {:.2f} mg/mL".format(np.mean(y_pred), np.std(y_pred)))
     #st.write("Expected Concentration by HPLC = 9.6 mg/mL")
-
-    st.table(pd.DataFrame({"Predicted mg/mL":(y_pred.flatten())}))
+    df_out = pd.DataFrame({"Predicted mg/mL":(y_pred.flatten())})
+    st.table(df_out)
+    
+    if st.button('Download Results as CSV'):
+        tmp_download_link = download_link(df_out, 'Predicted_Results.csv', 'Click here to download your data!')
+    st.markdown(tmp_download_link, unsafe_allow_html=True)
 
 # %%
