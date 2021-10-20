@@ -176,7 +176,7 @@ st.pyplot(final_model)
 
 #define function to download pickle model:
 def download_model(model):
-    output_model = pickle.dump(model)
+    output_model = pickle.dumps(model)
     b64 = base64.b64encode(output_model).decode()
     href = f'<a href="data:file/output_model;base64,{b64}" download="myfile.pkl">Download Trained Model .pkl File</a>'
     st.markdown(href, unsafe_allow_html=True)
