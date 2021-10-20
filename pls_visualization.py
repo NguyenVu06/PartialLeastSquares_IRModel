@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 import altair as alt
-import pydeck as pdk
 
 from scipy.signal import savgol_filter
 
@@ -124,7 +123,7 @@ for n_comp in xticks:
     rpds.append(rpd)
 
 # Plot the mses
-
+@st.cache(max_entries=20, ttl=3600)
 def plot_metrics(vals, ylabel, objective):
     plot_out = plt.figure(figsize=(14, 6.5))
     with plt.style.context('fivethirtyeight'):
