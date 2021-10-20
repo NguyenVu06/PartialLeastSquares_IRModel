@@ -233,7 +233,7 @@ if uploaded_csv is not None:
     #st.write("Expected Concentration by HPLC = 9.6 mg/mL")
     df_out = pd.DataFrame({"Predicted mg/mL":(y_pred.flatten())})
     st.table(df_out)
-    
+    #download predicted result table
     if st.button('Download Results as CSV'):
         tmp_download_link = download_link(df_out, 'Predicted_Results.csv', 'Click here to download your data!')
     st.markdown(tmp_download_link, unsafe_allow_html=True)
