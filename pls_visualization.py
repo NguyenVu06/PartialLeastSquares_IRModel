@@ -16,6 +16,8 @@ from scipy.signal import savgol_filter
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.pipeline import make_pipeline
+from sklearn.base import BaseEstimator
 
 import pickle #store trained model
 import base64 #define bit
@@ -172,6 +174,24 @@ with plt.style.context('seaborn'):
 
 st.pyplot(final_model)
 
+#%%
+###### Make Transformer Method ######
+class savgol_transformer(BaseEstimator):
+    def __init__(self):
+        pass
+    def fit(self, data, y=None):
+        return self
+    
+    def transform(self, x_dataset):
+        X_trans = savgol_filter(x_dataset, window_length=win_len, polyorder=poly_order, deriv=deriv_)
+        
+        return X_trans
+
+##### Make Pipeline ######
+pipe = make_pipeline(savgol_transformer(), PLSRegression(n_components=opt_nComp))
+pipe.fit(X,y)
+
+
 #define function to download pickle model:
 def download_model(model):
     output_model = pickle.dumps(model)
@@ -182,9 +202,9 @@ def download_model(model):
 #add button to export pickled trained Model
 if st.button("Export Trained Model"):
 
-    pls_model = PLSRegression(n_components=opt_nComp).fit(X2, y)
+    # pls_model = PLSRegression(n_components=opt_nComp).fit(X2, y)
     
-    download_model(pls_model)
+    download_model(pipe)
     st.write("Model Exported!")
 
 
@@ -216,12 +236,11 @@ if uploaded_csv is not None:
 
     #get X test matrix
     X_test = test_data.values[:, :]
-    X_test2 = savgol_filter(X_test,win_len, polyorder=poly_order, deriv=deriv_) 
-    pls = PLSRegression(n_components=opt_nComp)
+    # X_test2 = savgol_filter(X_test,win_len, polyorder=poly_order, deriv=deriv_) 
+    # pls = PLSRegression(n_components=opt_nComp)
+    # pls_model = pls.fit(X2, y)
 
-    pls_model = pls.fit(X2, y)
-
-    y_pred = pls_model.predict(X_test2)
+    y_pred = pipe.predict(X_test)
     y_pred_df = pd.DataFrame({"predicted_mg/mL":(y_pred.reshape(1, -1)).flatten()})
     y_pred_chart = alt.Chart(y_pred_df).mark_bar().encode(
         alt.X("predicted_mg/mL", bin=True),
