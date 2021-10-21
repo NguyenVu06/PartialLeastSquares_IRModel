@@ -122,8 +122,7 @@ for n_comp in xticks:
     mses.append(mse)
     rpds.append(rpd)
 
-# Plot the mses
-@st.cache(max_entries=20, ttl=3600)
+# Plot the metrics
 def plot_metrics(vals, ylabel, objective):
     plot_out = plt.figure(figsize=(14, 6.5))
     with plt.style.context('fivethirtyeight'):
