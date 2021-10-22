@@ -22,6 +22,8 @@ from sklearn.base import BaseEstimator
 import pickle #store trained model
 import base64 #define bit
 
+from datetime import datetime
+
 
 #%%
 
@@ -199,7 +201,7 @@ pipe.fit(X,y)
 def download_model(model):
     output_model = pickle.dumps(model)
     b64 = base64.b64encode(output_model).decode()
-    href = f'<a href="data:file/output_model;base64,{b64}" download="TrainedModel.pkl">Download Trained Model .pkl File</a>'
+    href = f'<a href="data:file/output_model;base64,{b64}" download="{datetime.now().strftime("%d%b%Y_%H%M%S")}_TrainedModel.pkl">Download Trained Model .pkl File</a>'
     st.markdown(href, unsafe_allow_html=True)
     
 #add button to export pickled trained Model
@@ -256,9 +258,12 @@ if uploaded_csv is not None:
     #download predicted result table
     if st.button('Download Results as CSV'):
         tmp_download_link = download_link(df_out, 'Predicted_Results.csv', 'Click here to download your data!')
-    st.markdown(tmp_download_link, unsafe_allow_html=True)
+        st.markdown(tmp_download_link, unsafe_allow_html=True)
 
-# %%
-import sklearn
-print(sklearn.__version__)
+#%%
+
+from datetime import datetime
+
+datetime.now().strftime("%d%b%Y_%H%M%S")
+
 # %%
