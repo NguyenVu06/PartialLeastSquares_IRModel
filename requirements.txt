@@ -5,5 +5,5 @@ seaborn
 altair
 pydeck
 scipy
-scikit-learn
+scikit-learn==1.0
 sklearn

@@ -177,18 +177,21 @@ st.pyplot(final_model)
 #%%
 ###### Make Transformer Method ######
 class savgol_transformer(BaseEstimator):
-    def __init__(self):
-        pass
+    def __init__(self, window_length, polyorder, deriv):
+        self.winlen = window_length
+        self.polyorder = polyorder
+        self.deriv = deriv
+        
     def fit(self, data, y=None):
         return self
     
     def transform(self, x_dataset):
-        X_trans = savgol_filter(x_dataset, window_length=win_len, polyorder=poly_order, deriv=deriv_)
+        X_trans = savgol_filter(x_dataset, window_length=self.winlen, polyorder=self.polyorder, deriv=self.deriv)
         
         return X_trans
 
 ##### Make Pipeline ######
-pipe = make_pipeline(savgol_transformer(), PLSRegression(n_components=opt_nComp))
+pipe = make_pipeline(savgol_transformer(window_length=win_len, polyorder=poly_order, deriv=deriv_), PLSRegression(n_components=opt_nComp))
 pipe.fit(X,y)
 
 
@@ -196,7 +199,7 @@ pipe.fit(X,y)
 def download_model(model):
     output_model = pickle.dumps(model)
     b64 = base64.b64encode(output_model).decode()
-    href = f'<a href="data:file/output_model;base64,{b64}" download="myfile.pkl">Download Trained Model .pkl File</a>'
+    href = f'<a href="data:file/output_model;base64,{b64}" download="TrainedModel.pkl">Download Trained Model .pkl File</a>'
     st.markdown(href, unsafe_allow_html=True)
     
 #add button to export pickled trained Model
@@ -210,8 +213,7 @@ if st.button("Export Trained Model"):
 
 def download_link(object_to_download, download_filename, download_link_text):
     """
-    Generates a link to download the given object_to_download.
-    - from Chad_Mitchell (streamlit)
+
     object_to_download (str, pd.DataFrame):  The object to be downloaded.
     download_filename (str): filename and extension of file. e.g. mydata.csv, some_txt_output.txt
     download_link_text (str): Text to display for download link.
@@ -256,4 +258,7 @@ if uploaded_csv is not None:
         tmp_download_link = download_link(df_out, 'Predicted_Results.csv', 'Click here to download your data!')
     st.markdown(tmp_download_link, unsafe_allow_html=True)
 
+# %%
+import sklearn
+print(sklearn.__version__)
 # %%
