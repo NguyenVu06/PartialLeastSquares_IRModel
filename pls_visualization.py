@@ -103,7 +103,7 @@ cv_ = st.sidebar.slider(" K-Fold Validation, K = ", 3, 15, step=1)
 
 def optimise_pls_cv(X, y, n_comp):
     # Define PLS object
-    pls = PLSRegression(n_components=n_comp)
+    pls = PLSRegression(n_components=n_comp, scale=False)
 
     # Cross-validation
     y_cv = cross_val_predict(pls, X, y, cv=cv_)
@@ -193,7 +193,7 @@ class savgol_transformer(BaseEstimator):
         return X_trans
 
 ##### Make Pipeline ######
-pipe = make_pipeline(savgol_transformer(window_length=win_len, polyorder=poly_order, deriv=deriv_), PLSRegression(n_components=opt_nComp))
+pipe = make_pipeline(savgol_transformer(window_length=win_len, polyorder=poly_order, deriv=deriv_), PLSRegression(n_components=opt_nComp, scale=False))
 pipe.fit(X,y)
 
 
